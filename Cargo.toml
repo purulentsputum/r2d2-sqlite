@@ -1,6 +1,6 @@
 [package]
 name = "r2d2_sqlite"
-version = "0.34.0"
+version = "0.40.1"
 authors = [
   "Jovansonlee Cesar <ivanceras@gmail.com>",
   "Hugo Woesthuis <hugo@woesthuis.eu>",
@@ -8,7 +8,7 @@ authors = [
 ]
 license = "MIT"
 description = "SQLite and SQLCipher support for the r2d2 connection pool"
-repository = "https://github.com/ivanceras/r2d2-sqlite"
+repository = "https://github.com/purulentsputum/r2d2-sqlite"
 documentation = "https://docs.rs/r2d2_sqlite/"
 keywords = ["sqlite", "r2d2", "pool"]
 edition = "2018"
@@ -28,13 +28,13 @@ r2d2 = "0.8"
 uuid = { version = "1.0", features = ["v4", "fast-rng"] }
 
 [dependencies.rusqlite]
-version = "0.39"
+version = "0.40.1"
 
 [dev-dependencies]
 tempfile = "3"
 
 [dev-dependencies.rusqlite]
-version = "0.39"
+version = "0.40.1"
 features = ["trace"]
 
 
