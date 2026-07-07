@@ -11,7 +11,7 @@ description = "SQLite and SQLCipher support for the r2d2 connection pool"
 repository = "https://github.com/purulentsputum/r2d2-sqlite"
 documentation = "https://docs.rs/r2d2_sqlite/"
 keywords = ["sqlite", "r2d2", "pool"]
-edition = "2018"
+edition = "2024"
 
 [lib]
 name = "r2d2_sqlite"
