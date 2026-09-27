@@ -16,7 +16,9 @@ use rusqlite::trace::TraceEventCodes;
 
 #[test]
 fn test_basic() {
-    let manager = SqliteConnectionManager::file("file.db");
+    let dir = TempDir::new().unwrap();
+    let path = dir.path().join("file.db");
+    let manager = SqliteConnectionManager::file(path);
     let pool = r2d2::Pool::builder().max_size(2).build(manager).unwrap();
 
     let (s1, r1) = mpsc::channel();
@@ -46,7 +48,9 @@ fn test_basic() {
 
 #[test]
 fn test_file() {
-    let manager = SqliteConnectionManager::file("file.db");
+    let dir = TempDir::new().unwrap();
+    let path = dir.path().join("file.db");
+    let manager = SqliteConnectionManager::file(path);
     let pool = r2d2::Pool::builder().max_size(2).build(manager).unwrap();
 
     let (s1, r1) = mpsc::channel();
@@ -76,7 +80,9 @@ fn test_file() {
 
 #[test]
 fn test_is_valid() {
-    let manager = SqliteConnectionManager::file("file.db");
+    let dir = TempDir::new().unwrap();
+    let path = dir.path().join("file.db");
+    let manager = SqliteConnectionManager::file(path);
     let pool = r2d2::Pool::builder()
         .max_size(1)
         .test_on_check_out(true)
@@ -97,9 +103,15 @@ fn test_error_handling() {
 
 #[test]
 fn test_with_flags() {
+    let dir = TempDir::new().unwrap();
+    let path = dir.path().join("file.db");
+    {
+        // Pre-create the DB
+        Connection::open(&path).unwrap();
+    }
     // Open db as read only and try to modify it, it should fail
-    let manager = SqliteConnectionManager::file("file.db")
-        .with_flags(rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY);
+    let manager =
+        SqliteConnectionManager::file(&path).with_flags(rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY);
     let pool = r2d2::Pool::builder().max_size(2).build(manager).unwrap();
     let conn = pool.get().unwrap();
     let result = conn.execute_batch("CREATE TABLE hello(world)");
@@ -108,15 +120,17 @@ fn test_with_flags() {
 
 #[test]
 fn test_with_init() {
-    fn trace_sql(event: TraceEvent<'_> ){
+    fn trace_sql(event: TraceEvent<'_>) {
         if let TraceEvent::Stmt(_, sql) = event {
-        println!("{}", sql)
+            println!("{}", sql)
         }
     }
+    let dir = TempDir::new().unwrap();
+    let path = dir.path().join("file.db");
 
     // Set user_version in init, then read it back to check that it was set
-    let manager = SqliteConnectionManager::file("file.db").with_init(|c| {
-        c.trace_v2(TraceEventCodes::SQLITE_TRACE_STMT,Some(trace_sql));
+    let manager = SqliteConnectionManager::file(path).with_init(|c| {
+        c.trace_v2(TraceEventCodes::SQLITE_TRACE_STMT, Some(trace_sql));
         c.execute_batch("PRAGMA user_version=123")
     });
     let pool = r2d2::Pool::builder().max_size(2).build(manager).unwrap();
